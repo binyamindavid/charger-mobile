@@ -35,6 +35,7 @@ class _SignUPScreenState extends State<SignUPScreen> {
   }
 
   int i = 1;
+  String signupErrorMessage = '';
 
   @override
   Widget build(BuildContext context) {
@@ -229,6 +230,16 @@ class _SignUPScreenState extends State<SignUPScreen> {
                                               .copyWith(
                                               labelText: "Mot de passe")),
                                       SizedBox(
+                                        height: 15,
+                                      ),
+                                      Text(
+                                        signupErrorMessage,
+                                        style: const TextStyle(
+                                          color: Colors.red,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      SizedBox(
                                         height: 5,
                                       ),
                                     ],
@@ -297,6 +308,11 @@ class _SignUPScreenState extends State<SignUPScreen> {
                                               if (kDebugMode) {
                                                 print('Error: $error');
                                               }
+
+                                              setState(() {
+                                                signupErrorMessage = 'Impossible de créer un compte.';
+                                              });
+                                              
                                             }
                                           },
                                           child: Container(

@@ -23,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordController = TextEditingController();
 
   int i = 0;
+  String loginErrorMessage = '';
 
   @override
   Widget build(BuildContext context) {
@@ -181,6 +182,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                                           labelText:
                                                               "Mot de passe")),
                                           const SizedBox(
+                                            height: 15,
+                                          ),
+                                          Text(
+                                            loginErrorMessage,
+                                            style: const TextStyle(
+                                              color: Colors.red,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          const SizedBox(
                                             height: 5,
                                           ),
                                         ],
@@ -254,9 +265,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                               // Handle token storage as needed
                                             } catch (error) {
+                                              // Use this error to show the user that login was no good
                                               if (kDebugMode) {
                                                 print('Error: $error');
                                               }
+
+                                              setState(() {
+                                                loginErrorMessage = 'Numéro de téléphone ou mot de passe invalide';
+                                              });
                                             }
                                           },
                                           child: Container(
