@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:charger/animation/animations.dart';
 import 'package:charger/screens/signup.dart';
@@ -10,7 +11,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constant.dart';
 
 class LoginScreen extends StatefulWidget {
-  LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -32,13 +33,13 @@ class _LoginScreenState extends State<LoginScreen> {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-            backgroundColor: const Color(0xfffdfdfdf),
+            backgroundColor: const Color(0xFFFFFFFF),
             body: i == 0
                 ? SingleChildScrollView(
                     child: Column(
                       children: [
                         Container(
-                          margin: EdgeInsets.all(25),
+                          margin: const EdgeInsets.all(25),
                           child: Column(
                             children: [
                               Row(
@@ -105,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                               // Top Text
                               Container(
-                                padding: EdgeInsets.only(left: 15),
+                                padding: const EdgeInsets.only(left: 15),
                                 width: width,
                                 child: TopAnime(
                                   1,
@@ -240,23 +241,27 @@ class _LoginScreenState extends State<LoginScreen> {
                                               // Save the token to SharedPreferences or other storage
                                               final storage =
                                                   FlutterSecureFileStorage(
-                                                      FlutterSecureStorage());
+                                                      const FlutterSecureStorage());
                                               await storage.write(
                                                   key: 'jwt', value: token);
 
                                               final jwt = await storage
                                                   .read<String>(key: 'jwt');
 
-                                              print('JWT: $jwt');
+                                              if (kDebugMode) {
+                                                print('JWT: $jwt');
+                                              }
 
                                               // Handle token storage as needed
                                             } catch (error) {
-                                              print('Error: $error');
+                                              if (kDebugMode) {
+                                                print('Error: $error');
+                                              }
                                             }
                                           },
                                           child: Container(
                                             decoration: BoxDecoration(
-                                                color: Color(0xff054652),
+                                                color: const Color(0xff054652),
                                                 borderRadius:
                                                     BorderRadius.circular(50)),
                                             width: width / 4,
@@ -273,11 +278,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                               )
-                            : SignUPScreen()
+                            : const SignUPScreen()
                       ],
                     ),
                   )
-                : SignUPScreen()),
+                : const SignUPScreen()),
       ),
     );
   }

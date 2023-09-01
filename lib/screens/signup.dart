@@ -12,7 +12,7 @@ import 'package:email_validator/email_validator.dart';
 import '../constant.dart';
 
 class SignUPScreen extends StatefulWidget {
-  SignUPScreen({Key? key}) : super(key: key);
+  const SignUPScreen({Key? key}) : super(key: key);
 
   @override
   State<SignUPScreen> createState() => _SignUPScreenState();
@@ -24,9 +24,14 @@ class _SignUPScreenState extends State<SignUPScreen> {
   final passwordController = TextEditingController();
   final emailController = TextEditingController();
 
-  void Validate(String email) {
-    bool isvalid = EmailValidator.validate(email);
-    print(isvalid);
+  bool isEmailValid = true;
+  String emailValidationMessage = '';
+
+  void validateEmail(String email) {
+    setState(() {
+      isEmailValid = EmailValidator.validate(email);
+      emailValidationMessage = isEmailValid ? '' : 'Invalid email address';
+    });
   }
 
   int i = 1;
@@ -39,7 +44,7 @@ class _SignUPScreenState extends State<SignUPScreen> {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-            backgroundColor: Color(0xfffdfdfdf),
+            backgroundColor: const Color(0xFFFFFFFF),
             body: i == 1
                 ? SingleChildScrollView(
                     child: Column(
@@ -204,11 +209,12 @@ class _SignUPScreenState extends State<SignUPScreen> {
                                         cursorColor: Colors.black,
                                         style: TextStyle(color: Colors.black),
                                         showCursor: true,
-                                        //cursorColor: mainColor,
-                                        decoration:
-                                        kTextFiledInputDecoration.copyWith(
-                                            labelText:
-                                            "Addresse E-mail"),
+                                        decoration: kTextFiledInputDecoration.copyWith(
+                                          labelText: "Addresse E-mail",
+                                          errorText: isEmailValid ? null : emailValidationMessage,
+                                          errorStyle: TextStyle(color: Colors.red), //
+                                        ),
+                                        onChanged: validateEmail,
                                       ),
                                       SizedBox(
                                         height: 25,
@@ -239,7 +245,7 @@ class _SignUPScreenState extends State<SignUPScreen> {
                                 2,
                                 29,
                                 curve: Curves.fastOutSlowIn,
-                                child: Container(
+                                child: SizedBox(
                                   height: height / 6,
                                   // color: Colors.red,
                                   child: Stack(
@@ -257,8 +263,6 @@ class _SignUPScreenState extends State<SignUPScreen> {
                                         child: GestureDetector(
                                           onTap: () async {
                                             try {
-
-                                              Validate(emailController.text);
 
                                               final phoneNumber =
                                                   phoneNumberController.text;
