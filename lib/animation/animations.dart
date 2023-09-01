@@ -12,7 +12,6 @@ class TopAnime extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder(
-        child: child,
         tween: Tween<double>(begin: 0, end: 1),
         duration: Duration(seconds: seconds),
         curve: curve ?? Curves.ease,
@@ -24,7 +23,8 @@ class TopAnime extends StatelessWidget {
               child: this.child,
             ),
           );
-        });
+        },
+        child: child);
   }
 }
 
@@ -39,7 +39,6 @@ class BottomAnime extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder(
-        child: child,
         tween: Tween<double>(begin: 0, end: 1),
         curve: curve ?? Curves.ease,
         duration: Duration(seconds: seconds),
@@ -51,7 +50,8 @@ class BottomAnime extends StatelessWidget {
               child: this.child,
             ),
           );
-        });
+        },
+        child: child);
   }
 }
 
@@ -66,7 +66,6 @@ class LeftAnime extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder(
-        child: child,
         tween: Tween<double>(begin: 0, end: 1),
         curve: curve ?? Curves.ease,
         duration: Duration(seconds: seconds),
@@ -78,7 +77,8 @@ class LeftAnime extends StatelessWidget {
               child: this.child,
             ),
           );
-        });
+        },
+        child: child);
   }
 }
 
@@ -93,7 +93,6 @@ class RightAnime extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder(
-        child: child,
         tween: Tween<double>(begin: 0, end: 1),
         curve: curve ?? Curves.ease,
         duration: Duration(seconds: seconds),
@@ -105,6 +104,7 @@ class RightAnime extends StatelessWidget {
               child: this.child,
             ),
           );
-        });
+        },
+        child: child);
   }
 }
