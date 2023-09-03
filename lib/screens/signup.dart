@@ -346,7 +346,7 @@ class _SignUPScreenState extends State<SignUPScreen> {
 
 Future<Map<String, dynamic>> sendSignUpForm(
     String phoneNumber,  String email, String password) async {
-  final url = Uri.parse('https://5850-82-30-133-213.ngrok-free.app/v1/register');
+  final url = Uri.parse('https://remote-charger-5716b2f19117.herokuapp.com/v1/register');
   final response = await http.post(
     url,
     body: {
