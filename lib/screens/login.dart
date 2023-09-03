@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:charger/screens/home.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:charger/animation/animations.dart';
@@ -25,11 +26,35 @@ class _LoginScreenState extends State<LoginScreen> {
   int i = 0;
   String loginErrorMessage = '';
 
+  bool _loggedIn = false;
+
+  void _handleLoginSuccess(String token) async {
+    final storage = FlutterSecureFileStorage(const FlutterSecureStorage());
+    storage.write(key: 'jwt', value: token);
+
+    final jwt = await storage.read<String>(key: 'jwt');
+
+    if (kDebugMode) {
+      print('Stored JWT: $jwt');
+    }
+
+    setState(() {
+      _loggedIn = true;
+    });
+
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
+    if (_loggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+      });
+    }
     return SafeArea(
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -133,11 +158,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                               ),
-
                               SizedBox(
                                 height: height / 14,
                               ),
-
                               // TextFiled
                               Column(
                                 children: [
@@ -250,20 +273,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       as String;
 
                                               // Save the token to SharedPreferences or other storage
-                                              final storage =
-                                                  FlutterSecureFileStorage(
-                                                      const FlutterSecureStorage());
-                                              await storage.write(
-                                                  key: 'jwt', value: token);
+                                              final storage = FlutterSecureFileStorage(const FlutterSecureStorage());
+                                              await storage.write(key: 'jwt', value: token);
 
-                                              final jwt = await storage
-                                                  .read<String>(key: 'jwt');
+                                              // final jwt = await storage.read<String>(key: 'jwt');
+                                              //
+                                              // if (kDebugMode) {
+                                              //   print('JWT: $jwt');
+                                              // }
 
-                                              if (kDebugMode) {
-                                                print('JWT: $jwt');
-                                              }
+                                              _handleLoginSuccess(token);
 
-                                              // Handle token storage as needed
+
                                             } catch (error) {
                                               // Use this error to show the user that login was no good
                                               if (kDebugMode) {
