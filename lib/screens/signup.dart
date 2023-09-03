@@ -1,15 +1,18 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:charger/animation/animations.dart';
 import 'package:charger/screens/login.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_file_storage/flutter_secure_file_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:email_validator/email_validator.dart';
 
-import '../animation/animations.dart';
 import '../constant.dart';
 
 class SignUPScreen extends StatefulWidget {
-  SignUPScreen({Key? key}) : super(key: key);
+  const SignUPScreen({Key? key}) : super(key: key);
 
   @override
   State<SignUPScreen> createState() => _SignUPScreenState();
@@ -17,8 +20,22 @@ class SignUPScreen extends StatefulWidget {
 
 class _SignUPScreenState extends State<SignUPScreen> {
   final feature = ["Se connecter", "Compte"];
+  final phoneNumberController = TextEditingController();
+  final passwordController = TextEditingController();
+  final emailController = TextEditingController();
+
+  bool isEmailValid = true;
+  String emailValidationMessage = '';
+
+  void validateEmail(String email) {
+    setState(() {
+      isEmailValid = EmailValidator.validate(email);
+      emailValidationMessage = isEmailValid ? '' : 'Invalid email address';
+    });
+  }
 
   int i = 1;
+  String signupErrorMessage = '';
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +45,7 @@ class _SignUPScreenState extends State<SignUPScreen> {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-            backgroundColor: Color(0xfffdfdfdf),
+            backgroundColor: const Color(0xFFFFFFFF),
             body: i == 1
                 ? SingleChildScrollView(
                     child: Column(
@@ -39,7 +56,7 @@ class _SignUPScreenState extends State<SignUPScreen> {
                             children: [
                               // TabBar Code
                               Row(children: [
-                                Container(
+                                SizedBox(
                                   height: height / 19,
                                   width: width / 2,
                                   child: TopAnime(
@@ -163,7 +180,7 @@ class _SignUPScreenState extends State<SignUPScreen> {
                               ),
 
                               // TextFiled
-                              Container(
+                              SizedBox(
                                 width: width / 1.2,
                                 height: height / 2.65,
                                 child: TopAnime(
@@ -175,6 +192,7 @@ class _SignUPScreenState extends State<SignUPScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       TextField(
+                                        controller: phoneNumberController,
                                         keyboardType: TextInputType.phone,
                                         maxLength: 10,
                                         // readOnly: true, // * Just for Debug
@@ -188,27 +206,38 @@ class _SignUPScreenState extends State<SignUPScreen> {
                                         height: 25,
                                       ),
                                       TextField(
-                                          // readOnly: true, // * Just for Debug
+                                        controller: emailController,
+                                        cursorColor: Colors.black,
+                                        style: TextStyle(color: Colors.black),
+                                        showCursor: true,
+                                        decoration: kTextFiledInputDecoration.copyWith(
+                                          labelText: "Addresse E-mail",
+                                          errorText: isEmailValid ? null : emailValidationMessage,
+                                          errorStyle: TextStyle(color: Colors.red), //
+                                        ),
+                                        onChanged: validateEmail,
+                                      ),
+                                      SizedBox(
+                                        height: 25,
+                                      ),
+                                      TextField(
+                                          controller: passwordController,
                                           cursorColor: Colors.black,
                                           style: TextStyle(color: Colors.black),
                                           showCursor: true,
                                           //cursorColor: mainColor,
                                           decoration: kTextFiledInputDecoration
                                               .copyWith(
-                                                  labelText: "Mot de passe")),
+                                              labelText: "Mot de passe")),
                                       SizedBox(
-                                        height: 25,
+                                        height: 15,
                                       ),
-                                      TextField(
-                                        // readOnly: true, // * Just for Debug
-                                        cursorColor: Colors.black,
-                                        style: TextStyle(color: Colors.black),
-                                        showCursor: true,
-                                        //cursorColor: mainColor,
-                                        decoration:
-                                            kTextFiledInputDecoration.copyWith(
-                                                labelText:
-                                                    "Confirmation mot de passe"),
+                                      Text(
+                                        signupErrorMessage,
+                                        style: const TextStyle(
+                                          color: Colors.red,
+                                          fontSize: 16,
+                                        ),
                                       ),
                                       SizedBox(
                                         height: 5,
@@ -227,7 +256,7 @@ class _SignUPScreenState extends State<SignUPScreen> {
                                 2,
                                 29,
                                 curve: Curves.fastOutSlowIn,
-                                child: Container(
+                                child: SizedBox(
                                   height: height / 6,
                                   // color: Colors.red,
                                   child: Stack(
@@ -243,12 +272,48 @@ class _SignUPScreenState extends State<SignUPScreen> {
                                         left: 280,
                                         top: 10,
                                         child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        LoginScreen()));
+                                          onTap: () async {
+                                            try {
+
+                                              final phoneNumber =
+                                                  phoneNumberController.text;
+                                              final password =
+                                                  passwordController.text;
+                                              final email =
+                                                  emailController.text;
+
+                                              final responseData =
+                                                  await sendSignUpForm(
+                                                  phoneNumber, password, email);
+                                              final token = responseData['token'] as String;
+
+                                              // Save the token to SharedPreferences or other storage
+                                              final storage =
+                                              FlutterSecureFileStorage(
+                                                  FlutterSecureStorage());
+
+                                              await storage.write(
+                                                  key: 'jwt', value: token);
+
+                                              final jwt = await storage
+                                                  .read<String>(key: 'jwt');
+
+                                              // Print only on dev
+                                              if (kDebugMode) {
+                                                print('JWT: $jwt');
+                                              }
+
+                                              // Handle token storage as needed
+                                            } catch (error) {
+                                              if (kDebugMode) {
+                                                print('Error: $error');
+                                              }
+
+                                              setState(() {
+                                                signupErrorMessage = 'Impossible de créer un compte.';
+                                              });
+                                              
+                                            }
                                           },
                                           child: Container(
                                             decoration: BoxDecoration(
@@ -276,5 +341,25 @@ class _SignUPScreenState extends State<SignUPScreen> {
                 : LoginScreen()),
       ),
     );
+  }
+}
+
+Future<Map<String, dynamic>> sendSignUpForm(
+    String phoneNumber,  String email, String password) async {
+  final url = Uri.parse('https://remote-charger-5716b2f19117.herokuapp.com/v1/register');
+  final response = await http.post(
+    url,
+    body: {
+      'phone': phoneNumber,
+      'email': email,
+      'password': password,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    final responseData = json.decode(response.body);
+    return responseData;
+  } else {
+    throw Exception('Failed to sign up customer');
   }
 }

@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () => context.go('/login'),
-          child: const Text('Try Login'),
+          child: const Text('Login'),
         ),
       ),
     );
