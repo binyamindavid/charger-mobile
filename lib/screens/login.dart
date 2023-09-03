@@ -1,15 +1,19 @@
 import 'dart:convert';
 
+import 'package:charger/screens/home.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:charger/animation/animations.dart';
 import 'package:charger/screens/signup.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_file_storage/flutter_secure_file_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../constant.dart';
 
 class LoginScreen extends StatefulWidget {
-  LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -19,32 +23,72 @@ class _LoginScreenState extends State<LoginScreen> {
   final feature = ["Se connecter", "Compte"];
   final phoneNumberController = TextEditingController();
   final passwordController = TextEditingController();
+
   int i = 0;
+  String loginErrorMessage = '';
+
+  bool _loggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (_loggedIn) {
+      retrieveTokenAndHandleLoginSuccess();
+    }
+  }
+
+  void retrieveTokenAndHandleLoginSuccess() async {
+    final storage = FlutterSecureFileStorage(const FlutterSecureStorage());
+    final token = await storage.read<String>(key: 'jwt');
+
+    if (token != null) {
+      _handleLoginSuccess(token);
+    }
+  }
+
+  Future<void> _handleLoginSuccess(String token) async {
+    final storage = FlutterSecureFileStorage(const FlutterSecureStorage());
+
+    final jwt = await storage.read<String>(key: 'jwt');
+
+    if (kDebugMode) {
+      print('Stored JWT: $jwt');
+    }
+
+    setState(() {
+      _loggedIn = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
-
-
+    // if (_loggedIn) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     Navigator.pushReplacement(context,
+    //         MaterialPageRoute(builder: (context) => const Home Screen()));
+    //   });
+    // }
     return SafeArea(
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-            backgroundColor: Color(0xfffdfdfdf),
+            backgroundColor: const Color(0xFFFFFFFF),
             body: i == 0
                 ? SingleChildScrollView(
                     child: Column(
                       children: [
                         Container(
-                          margin: EdgeInsets.all(25),
+                          margin: const EdgeInsets.all(25),
                           child: Column(
                             children: [
                               Row(
                                   // TabBar Code
                                   children: [
-                                    Container(
+                                    SizedBox(
                                       height: height / 19,
                                       width: width / 2,
                                       child: TopAnime(
@@ -79,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       ),
                                                     ),
                                                   ),
-                                                  SizedBox(
+                                                  const SizedBox(
                                                     height: 8,
                                                   ),
                                                   i == index
@@ -99,19 +143,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                     Expanded(child: Container()),
                                   ]),
 
-                              SizedBox(
+                              const SizedBox(
                                 height: 50,
                               ),
 
                               // Top Text
                               Container(
-                                padding: EdgeInsets.only(left: 15),
+                                padding: const EdgeInsets.only(left: 15),
                                 width: width,
                                 child: TopAnime(
                                   1,
                                   20,
                                   curve: Curves.fastOutSlowIn,
-                                  child: Column(
+                                  child: const Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
@@ -131,15 +175,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                               ),
-
                               SizedBox(
                                 height: height / 14,
                               ),
-
                               // TextFiled
                               Column(
                                 children: [
-                                  Container(
+                                  SizedBox(
                                     width: width / 1.2,
                                     height: height / 2.45,
                                     //  color: Colors.red,
@@ -156,21 +198,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                             keyboardType: TextInputType.phone,
                                             maxLength: 11,
                                             cursorColor: Colors.black,
-                                            style:
-                                                TextStyle(color: Colors.black),
+                                            style: const TextStyle(
+                                                color: Colors.black),
                                             showCursor: true,
                                             //cursorColor: mainColor,
                                             decoration:
                                                 kTextFiledInputDecoration,
                                           ),
-                                          SizedBox(
+                                          const SizedBox(
                                             height: 25,
                                           ),
                                           TextField(
                                               controller: passwordController,
                                               // readOnly: true, // * Just for Debug
                                               cursorColor: Colors.black,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   color: Colors.black),
                                               showCursor: true,
                                               //cursorColor: mainColor,
@@ -179,7 +221,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       .copyWith(
                                                           labelText:
                                                               "Mot de passe")),
-                                          SizedBox(
+                                          const SizedBox(
+                                            height: 15,
+                                          ),
+                                          Text(
+                                            loginErrorMessage,
+                                            style: const TextStyle(
+                                              color: Colors.red,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          const SizedBox(
                                             height: 5,
                                           ),
                                         ],
@@ -203,7 +255,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   // color: Colors.red,
                                   child: Stack(
                                     children: [
-                                      Positioned(
+                                      const Positioned(
                                         left: 30,
                                         top: 15,
                                         child: Text(
@@ -217,7 +269,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         padding: const EdgeInsets.only(top: 43),
                                         child: Container(
                                             height: height / 9,
-                                            color: Color(0xff0593ca)),
+                                            color: const Color(0xff0593ca)),
                                       ),
                                       Positioned(
                                         left: 280,
@@ -225,28 +277,54 @@ class _LoginScreenState extends State<LoginScreen> {
                                         child: GestureDetector(
                                           onTap: () async {
                                             try {
-                                              final phoneNumber = phoneNumberController.text;
-                                              final password = passwordController.text;
+                                              final phoneNumber =
+                                                  phoneNumberController.text;
+                                              final password =
+                                                  passwordController.text;
 
                                               final responseData =
-                                                  await sendLoginForm(phoneNumber, password);
-                                              final token = responseData['token'] as String;
+                                                  await sendLoginForm(
+                                                      phoneNumber, password);
+                                              final token =
+                                                  responseData['token']
+                                                      as String;
 
-                                              print('JWT: $token');
+                                              // Save the token to SharedPreferences or other storage
+                                              final storage =
+                                                  FlutterSecureFileStorage(
+                                                      const FlutterSecureStorage());
+                                              await storage.write(
+                                                  key: 'jwt', value: token);
 
-                                              // Handle token storage as needed
+                                              // final jwt = await storage.read<String>(key: 'jwt');
+                                              //
+                                              // if (kDebugMode) {
+                                              //   print('JWT: $jwt');
+                                              // }
+
+                                              await _handleLoginSuccess(token);
+
+                                              GoRouter.of(context).go('/home');
                                             } catch (error) {
-                                              print('Error: $error');
+                                              // Use this error to show the user that login was no good
+                                              if (kDebugMode) {
+                                                print('Error: $error');
+                                              }
+
+                                              setState(() {
+                                                loginErrorMessage =
+                                                    'Numéro de téléphone ou mot de passe invalide';
+                                              });
                                             }
                                           },
                                           child: Container(
                                             decoration: BoxDecoration(
-                                                color: Color(0xff054652),
+                                                color: const Color(0xff054652),
                                                 borderRadius:
                                                     BorderRadius.circular(50)),
                                             width: width / 4,
                                             height: height / 12,
-                                            child: Icon(
+                                            child: const Icon(
                                               Icons.arrow_forward,
                                               size: 25,
                                               color: Colors.white,
@@ -258,11 +336,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                               )
-                            : SignUPScreen()
+                            : const SignUPScreen()
                       ],
                     ),
                   )
-                : SignUPScreen()),
+                : const SignUPScreen()),
       ),
     );
   }
@@ -270,7 +348,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
 Future<Map<String, dynamic>> sendLoginForm(
     String phoneNumber, String password) async {
-  final url = Uri.parse('https://add0-82-30-133-213.ngrok-free.app/v1/auth');
+  final url =
+      Uri.parse('https://remote-charger-5716b2f19117.herokuapp.com/v1/auth');
   final response = await http.post(
     url,
     body: {
