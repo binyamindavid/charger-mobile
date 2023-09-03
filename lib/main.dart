@@ -2,12 +2,16 @@ import 'package:charger/screens/home.dart';
 import 'package:charger/screens/login.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-final GoRouter _router = GoRouter(
+
+GoRouter router(String? jwt)  {
+  return GoRouter(
+  initialLocation: jwt != null ? '/home' : '/login',
   routes: <RouteBase>[
     GoRoute(
       path: '/',
@@ -32,6 +36,7 @@ final GoRouter _router = GoRouter(
     ),
   ],
 );
+}
 
 
 class MyApp extends StatelessWidget {
@@ -41,7 +46,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      routerConfig: _router,
+      routerConfig: router(null),
     );
   }
 }
+
+
