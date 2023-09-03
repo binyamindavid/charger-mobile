@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:charger/animation/animations.dart';
 import 'package:charger/screens/signup.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_file_storage/flutter_secure_file_storage.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -46,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _handleLoginSuccess(String token) async {
+  Future<void> _handleLoginSuccess(String token) async {
     final storage = FlutterSecureFileStorage(const FlutterSecureStorage());
 
     final jwt = await storage.read<String>(key: 'jwt');
@@ -60,17 +61,17 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
-    if (_loggedIn) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
-      });
-    }
+    // if (_loggedIn) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     Navigator.pushReplacement(context,
+    //         MaterialPageRoute(builder: (context) => const Home Screen()));
+    //   });
+    // }
     return SafeArea(
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -197,8 +198,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                             keyboardType: TextInputType.phone,
                                             maxLength: 11,
                                             cursorColor: Colors.black,
-                                            style:
-                                                const TextStyle(color: Colors.black),
+                                            style: const TextStyle(
+                                                color: Colors.black),
                                             showCursor: true,
                                             //cursorColor: mainColor,
                                             decoration:
@@ -289,8 +290,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       as String;
 
                                               // Save the token to SharedPreferences or other storage
-                                              final storage = FlutterSecureFileStorage(const FlutterSecureStorage());
-                                              await storage.write(key: 'jwt', value: token);
+                                              final storage =
+                                                  FlutterSecureFileStorage(
+                                                      const FlutterSecureStorage());
+                                              await storage.write(
+                                                  key: 'jwt', value: token);
 
                                               // final jwt = await storage.read<String>(key: 'jwt');
                                               //
@@ -298,9 +302,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                               //   print('JWT: $jwt');
                                               // }
 
-                                              _handleLoginSuccess(token);
+                                              await _handleLoginSuccess(token);
 
-
+                                              GoRouter.of(context).go('/home');
                                             } catch (error) {
                                               // Use this error to show the user that login was no good
                                               if (kDebugMode) {
@@ -308,7 +312,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                               }
 
                                               setState(() {
-                                                loginErrorMessage = 'Numéro de téléphone ou mot de passe invalide';
+                                                loginErrorMessage =
+                                                    'Numéro de téléphone ou mot de passe invalide';
                                               });
                                             }
                                           },
@@ -343,7 +348,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
 Future<Map<String, dynamic>> sendLoginForm(
     String phoneNumber, String password) async {
-  final url = Uri.parse('https://remote-charger-5716b2f19117.herokuapp.com/v1/auth');
+  final url =
+      Uri.parse('https://remote-charger-5716b2f19117.herokuapp.com/v1/auth');
   final response = await http.post(
     url,
     body: {
